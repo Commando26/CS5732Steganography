@@ -1,7 +1,7 @@
 import hashlib
 from PIL import Image
 import os
-import math
+from math import floor
 from Crypto.Cipher import AES
 from Crypto.Util import Padding
 from bitstring import BitArray
@@ -10,9 +10,6 @@ import sys
 #returns image bytes
 def load_image(image_file_path):
     im = Image.open(image_file_path)
-
-    [size_x, size_y] = im.size
-
     return im.convert('RGBA')
 
 def hash_image(image_file_path):
@@ -45,7 +42,7 @@ def decrypt_message(image_hash: bytes, bytes_to_decrypt : bytes):
 def check_if_can_encode(bytes_size: bytes, total_pixels):
     
     #image must have enought bytes to encode everything
-    if math.floor(total_pixels / 2) - 4 > bytes_size:
+    if floor(total_pixels / 2) - 4 >= bytes_size:
         return True
     return False
 
@@ -106,8 +103,6 @@ def encode_encrypted_message(image_file_path, message_file_path):
 
     if can_encode: 
         encode_message_into_image(image_pixels, message_encrypted)
-        
-        #image_pixels.show()
         image_pixels.save("encoded_" + image_file_path)
 
     else:
@@ -134,6 +129,7 @@ def decode_encrypted_message(image_file_path, encrypted_image_file_path, output_
     encrypted_image_file = load_image(encrypted_image_file_path)
 
     [size_x, size_y] = image_pixels.size 
+
 
     image_length_pixels = [image_pixels.getpixel( (int(i%size_x), int(i/size_x)) ) for i in range(8)] #length is held in 32 bit in which takes 8 pixels
     message_length_pixels = [encrypted_image_file.getpixel( (int(i%size_x), int(i/size_x)) ) for i in range(8)] #length is held in 32 bit in which takes 8 pixels
